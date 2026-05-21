@@ -1,0 +1,15 @@
+kind = "ziza"
+validation_set = "wt_dataset.csv"
+validation_set_tp_clients = "bad_clients"
+validation_set_tp_domains = "bad_domains"
+validation_set_size = 18908057
+validation_set_all_clients = "unique_clients.txt"
+validation_set_all_domains = "unique_domains.txt"
+peacetime_set = "pt_dataset.csv"
+peacetime_set_size = 1736805
+peacetime_domain_allowlist = "pt_domain_allowlist.txt"
+peacetime_bfcms_allowlist = "pt_bfcms_allowlist.txt"
+training_set = "tuning_dataset.csv"
+training_set_size = 1736805
+client_oracle = "client.oracle"
+tuning_client_oracle = "tune.client.oracle"

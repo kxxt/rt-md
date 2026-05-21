@@ -1,0 +1,18 @@
+Threshold: 0.6
+RawThreshold: 72
+TunedRawThreshold for 0.01: 70.00014188807883
+TunedThreshold 0.01: 0.5833345157339902
+ClientTunedRawThreshold for 0.01: 103.00031006457395
+ClientTunedThreshold 0.01: 0.858335917204783
+TunedRawThreshold for 0.005: 72.00015023265945
+TunedThreshold 0.005: 0.6000012519388288
+ClientTunedRawThreshold for 0.005: 131.00050366149534
+ClientTunedThreshold 0.005: 1.0916708638457946
+TunedRawThreshold for 0.001: 72.00015023265945
+TunedThreshold 0.001: 0.6000012519388288
+ClientTunedRawThreshold for 0.001: 316.00295717316726
+ClientTunedThreshold 0.001: 2.6333579764430604
+TunedRawThreshold for 0.0001: 255.00192274742275
+TunedThreshold 0.0001: 2.1250160228951898
+ClientTunedRawThreshold for 0.0001: 742.0163643706843
+ClientTunedThreshold 0.0001: 6.1834697030890355

@@ -1,0 +1,19 @@
+kind = "ours"
+validation_set = "eval.csv.zst"
+validation_set_size = 375200426
+validation_set_tp_clients = "val_tp_clients.list"
+validation_set_tp_domains = "val_tp_domains.list"
+validation_set_all_clients = "all_clients"
+validation_set_all_domains = "val_all_domains.list"
+# This is just a placeholder,
+# we do not do peacetime tuning for adversial-md dataset
+peacetime_set = "eval.csv.zst"
+peacetime_set_size = 62685763
+peacetime_domain_allowlist = "/dev/null"
+peacetime_bfcms_allowlist = "/dev/null"
+# This is just a placeholder,
+# we do not do training for adversial-md dataset
+training_set = "eval.csv.zst"
+training_set_size = 343464916
+client_oracle = "client.oracle"
+tuning_client_oracle = "tune.client.oracle"

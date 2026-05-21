@@ -1,0 +1,28 @@
+Both datasets consist of the following features separated by comma in the following order:
+
+user_ip 		# user identification (IP address) - anonymized
+domain 			# top level domail (TLD)
+timestamp 		# timestamp of the request
+attack 			# indicator if the request is malicious (True/False) 
+request 		# request text
+len 			# length of the request (without TLD) -> length(something.google.com) = 9 (not counting .google.com) 
+subdomains_count 	# number of subdomains (without TLD)  -> subdomains_count(something.there.google.com) = 2 (not counting .google.com) 
+w_count 		# number of English words in the request
+w_max			# lenght of the longest English word in the request
+entropy 		# entropy of DNS request 
+w_max_ratio		# longest English word length to request length ratio 
+w_count_ratio		# number of English words to request lenght ratio 
+digits_ratio		# percentage of digits in the request
+uppercase_ratio		# percentage of capital letter in the request
+
+# The following features are calculated using the current and the previous 9 requests (window size = 10).
+# Requests are grouped by (user_ip, domain) key.
+
+time_avg 		# average time between requests
+time_stdev 		# standard deviation of times between requests
+size_avg 		# average size (length) of the requests
+size stdev 		# standard deviation of sizes of requests
+throughput 		# number of characters in requests transmitted per second
+unique 			# uniqueness indicator with values in range [0-1] (0 - all requests are equal, 1 - all requests are different)
+entropy_avg		# average value of entropy
+entropy_stdev 		# standard deviation of entropy

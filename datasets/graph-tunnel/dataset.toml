@@ -1,0 +1,15 @@
+kind = "ours"
+validation_set = "eval.csv.zst"
+validation_set_size = 375200426
+validation_set_tp_clients = "val_tp_clients.list"
+validation_set_tp_domains = "val_tp_domains.list"
+validation_set_all_clients = "all_clients"
+validation_set_all_domains = "val_all_domains.list"
+peacetime_set = "peacetime.csv.zst"
+peacetime_set_size = 62685763
+peacetime_domain_allowlist = "pt_ibhh_allow.list"
+peacetime_bfcms_allowlist = "pt_allow.list"
+training_set = "train.csv.zst"
+training_set_size = 343464916
+client_oracle = "client.oracle"
+tuning_client_oracle = "tune.client.oracle"

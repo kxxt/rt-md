@@ -1,0 +1,13 @@
+GEM
+  specs:
+    public_suffix (6.0.2)
+
+PLATFORMS
+  ruby
+  x86_64-linux
+
+DEPENDENCIES
+  public_suffix
+
+BUNDLED WITH
+   2.6.9

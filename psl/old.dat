@@ -1,0 +1,31 @@
+// Those has become history.
+// But still useful for evaluation on old datasets
+
+// PSL commit f3793d6
+*.yu
+
+// https://en.wikipedia.org/wiki/Second-level_domain#Historic_second-level_domains
+conf.au
+gw.au
+info.au
+otc.au
+telememo.au
+tm.fr
+com.fr
+asso.fr
+co.nl
+ab.ca
+bc.ca
+mb.ca
+nb.ca
+nf.ca
+nl.ca
+ns.ca
+nt.ca
+nu.ca
+on.ca
+pe.ca
+qc.ca
+sk.ca
+yk.ca
+co.tv

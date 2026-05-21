@@ -1,0 +1,10 @@
+Threshold: 0.6
+RawThreshold: 72
+TunedRawThreshold for 0.01: 33
+TunedThreshold 0.01: 0.275
+TunedRawThreshold for 0.005: 52
+TunedThreshold 0.005: 0.43333333333333335
+TunedRawThreshold for 0.001: 241
+TunedThreshold 0.001: 2.0083333333333333
+TunedRawThreshold for 0.0001: 525
+TunedThreshold 0.0001: 4.375

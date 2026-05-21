@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-MD Alerts</title>
+    <style>
+        :root {
+            --bg: #0f1724;
+            --card: #0b1220;
+            --muted: #9aa4b2;
+            --accent: #60a5fa;
+            --danger: #ff6b6b
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: linear-gradient(180deg, #071427 0%, #071829 100%);
+            font-family: Inter, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial
+        }
+
+        .app {
+            max-width: 1100px;
+            margin: 28px auto;
+            padding: 20px
+        }
+
+        header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px
+        }
+
+        h1 {
+            color: white;
+            font-weight: 600;
+            font-size: 20px;
+            margin: 0
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        button,
+        input[type=search],
+        select {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            color: white
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        #error {
+            background: linear-gradient(90deg, #3a0f0f, #2b0b0b);
+            padding: 12px;
+            border-radius: 8px;
+            color: #ffdede;
+            margin-bottom: 12px;
+            display: none
+        }
+
+        #list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            color: white
+        }
+
+        .card h3 {
+            margin: 0 0 6px 0;
+            font-size: 15px
+        }
+
+        .meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 8px
+        }
+
+        .domains {
+            margin-top: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .domain {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.01)
+        }
+
+        .bar {
+            height: 8px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--accent), #3b82f6);
+            flex: 1;
+            margin-left: 12px;
+            margin-right: 8px
+        }
+
+        .domain-name {
+            white-space: nowrap;
+            overflow-wrap: anywhere;
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        footer {
+            color: var(--muted);
+            margin-top: 18px;
+            font-size: 13px
+        }
+
+        .empty {
+            color: var(--muted);
+            padding: 16px;
+            text-align: center
+        }
+
+        .count {
+            margin-left: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header>
+            <div>
+                <h1>Alerts</h1>
+            </div>
+            <div class="controls">
+                <input id="suffix" type="search" placeholder="Allowlist suffix..." />
+                <input id="search" type="search" placeholder="Filter by client or domain..." />
+                <select id="sort">
+                    <option value="total_desc">Top total</option>
+                    <option value="total_asc">Lowest total</option>
+                    <option value="ts_desc">Newest</option>
+                    <option value="ts_asc">Oldest</option>
+                </select>
+                <button id="refresh">Refresh</button>
+                <div class="status" id="last">—</div>
+            </div>
+        </header>
+
+        <div id="error"></div>
+        <div id="list" aria-live="polite"></div>
+        <div id="empty" class="empty" style="display:none">No alerts</div>
+
+    </div>
+
+    <script>
+        // Configuration
+        const API = '/alerts';
+        const AUTO_REFRESH_MS = 30_000; // 30s
+
+        // DOM
+        const listEl = document.getElementById('list');
+        const errorEl = document.getElementById('error');
+        const lastEl = document.getElementById('last');
+        const refreshBtn = document.getElementById('refresh');
+        const searchInput = document.getElementById('search');
+        const suffixAllowInput = document.getElementById('suffix');
+        const sortSelect = document.getElementById('sort');
+        const emptyEl = document.getElementById('empty');
+
+        let data = {}; // raw alerts
+
+        function showError(message) { errorEl.style.display = 'block'; errorEl.textContent = message }
+        function clearError() { errorEl.style.display = 'none'; errorEl.textContent = '' }
+
+        function formatTs(ts) {
+            try { const d = new Date(ts); return d.toLocaleString(); } catch (e) { return ts }
+        }
+
+        function render() {
+            listEl.innerHTML = '';
+            const query = searchInput.value.trim().toLowerCase();
+            const entries = Object.entries(data || {});
+            if (entries.length === 0) { emptyEl.style.display = 'block'; lastEl.textContent = 'no data'; return }
+            emptyEl.style.display = 'none';
+
+            // Convert to array of objects
+            const items = entries.map(([client, obj]) => ({ client, ...obj }));
+
+            // Filter
+            const filtered = items.filter(it => {
+                if (!query) return true;
+                if (it.client && it.client.toLowerCase().includes(query)) return true;
+                if (it.top_domains && it.top_domains.some(d => d[0].toLowerCase().includes(query))) return true;
+                return false;
+            });
+
+            // Sort
+            const sortVal = sortSelect.value;
+            filtered.sort((a, b) => {
+                if (sortVal === 'total_desc') return (b.total || 0) - (a.total || 0);
+                if (sortVal === 'total_asc') return (a.total || 0) - (b.total || 0);
+                if (sortVal === 'ts_desc') return new Date(b.ts) - new Date(a.ts);
+                if (sortVal === 'ts_asc') return new Date(a.ts) - new Date(b.ts);
+                return 0;
+            });
+
+            filtered.forEach(it => {
+                const card = document.createElement('article');
+                card.className = 'card';
+
+                const titleContainer = document.createElement('div');
+                titleContainer.style.display = 'flex';
+
+                const title = document.createElement('h3');
+                title.textContent = it.client || 'unknown';
+                title.style.display = 'inline';
+                titleContainer.appendChild(title);
+
+                const dismiss = document.createElement('button');
+                dismiss.style.marginLeft = 'auto';
+                dismiss.textContent = 'Dismiss';
+                dismiss.style.fontSize = '10px';
+                dismiss.style.paddingBlock = '2px';
+                dismiss.style.color = 'red';
+                dismiss.onclick = () => dismissAlert(it.client);
+                titleContainer.appendChild(dismiss);
+
+                card.appendChild(titleContainer);
+
+                const meta = document.createElement('div'); meta.className = 'meta';
+                meta.innerHTML = `<div><strong>${it.total ?? 0}</strong> total</div><div class="muted">${formatTs(it.ts || '')}</div>`;
+                const btn = document.createElement('button');
+                btn.style.marginLeft = 'auto';
+                btn.textContent = 'Ignore host';
+                btn.style.fontSize = '10px';
+                btn.style.paddingBlock = '2px';
+                btn.style.color = 'red';
+                btn.onclick = () => ignoreHost(it.client);
+                meta.appendChild(btn);
+                card.appendChild(meta);
+
+                // top domains
+                const domainsWrap = document.createElement('div'); domainsWrap.className = 'domains';
+                const top = (it.top_domains || []);
+                if (top.length === 0) {
+                    const p = document.createElement('div'); p.className = 'muted'; p.textContent = 'No domains'; domainsWrap.appendChild(p);
+                } else {
+                    // find max for bar scaling
+                    const max = Math.max(...top.map(t => t[1] || 0), 1);
+                    top.forEach(([name, count]) => {
+                        const row = document.createElement('div'); row.className = 'domain';
+                        row.style.display = 'flex'; row.style.alignItems = 'center';
+                        const n = document.createElement('div'); n.className = 'domain-name'; n.textContent = name;
+                        const c = document.createElement('div'); c.className = 'muted count'; c.textContent = count;
+                        row.appendChild(n); row.appendChild(c);
+                        const btn = document.createElement('button'); btn.textContent = 'Allow'; btn.style.marginLeft = '8px'; btn.onclick = () => allowDomain(name);
+                        row.appendChild(btn);
+                        domainsWrap.appendChild(row);
+                    });
+                }
+                card.appendChild(domainsWrap);
+                listEl.appendChild(card);
+            });
+
+            lastEl.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+        }
+
+        async function fetchAlerts() {
+            try {
+                clearError();
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Fetching...';
+                const res = await fetch(API, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+                const json = await res.json();
+                data = json;
+                render();
+            } catch (err) {
+                showError('Failed to fetch alerts: ' + err.message + ' — make sure the backend is running.');
+                data = {};
+                listEl.innerHTML = '';
+                emptyEl.style.display = 'block';
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh';
+            }
+        }
+
+        // Event listeners
+        refreshBtn.addEventListener('click', fetchAlerts);
+        searchInput.addEventListener('input', render);
+        sortSelect.addEventListener('change', render);
+        suffixAllowInput.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            event.preventDefault();
+            allowDomain(suffixAllowInput.value);
+            suffixAllowInput.value = '';
+        });
+
+        // Auto-refresh loop
+        let autoTimer = setInterval(fetchAlerts, AUTO_REFRESH_MS);
+
+        function allowDomain(domain) {
+            fetch('/allowlist', {
+                method: 'POST',
+                body: domain
+            }).then(() => fetchAlerts()).then(() => alert(domain + ' added to allowlist'));
+        }
+
+        function ignoreHost(host) {
+            fetch('/ignore-host', {
+                method: 'POST',
+                body: host
+            }).then(() => fetchAlerts()).then(() => alert('Ignored host ' + host));
+        }
+
+        function dismissAlert(host) {
+            fetch('/dismiss', {
+                method: 'POST',
+                body: host
+            }).then(() => fetchAlerts()).then(() => alert('Dismissed an alert from' + host));
+        }
+
+        // Initial fetch
+        fetchAlerts();
+
+        // Clean up on page hide
+        window.addEventListener('beforeunload', () => clearInterval(autoTimer));
+    </script>
+</body>
+
+</html>

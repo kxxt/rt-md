@@ -1,0 +1,12 @@
+BFCMS_THRESHOLDS=($(seq 0.1 0.1 0.9))
+BFCMS_THRESHOLDS+=($(seq 1 1 9))
+BFCMS_THRESHOLDS+=($(seq 10 5 320))
+UNIQD_THRESHOLDS=$(seq 0.1 0.1 10)
+
+# Acceptable FPRs to test
+ACCEPTABLE_FPRS=(
+    0.01
+    0.005
+    0.001
+    0.0001
+)

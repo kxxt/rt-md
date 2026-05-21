@@ -1,0 +1,13 @@
+diff --git a/config.py b/config.py
+index d41b435..994de8e 100644
+--- a/config.py
++++ b/config.py
+@@ -46,7 +46,7 @@ columns = [
+     "entropy_stdev",
+ ]
+ 
+-columns_to_extract = ["timestamp", "request"]
++columns_to_extract = ["timestamp", "request", "user_ip"]
+ 
+ tuning_cutoff_delta = 10
+ pt_cutoff_delta = 12

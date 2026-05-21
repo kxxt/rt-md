@@ -1,0 +1,5 @@
+raw/
+*.png
+*.pyc
+*.parquet
+*.csv.zst

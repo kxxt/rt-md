@@ -1,0 +1,19 @@
+[project]
+name = "dns-exf-detect"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ijson>=3.4.0.post0",
+    "matplotlib>=3.10.7",
+    "more-itertools>=10.8.0",
+    "pandas>=2.3.1",
+    "pyarrow>=22.0.0",
+    "rich>=14.2.0",
+    "scapy>=2.6.1",
+    "seaborn>=0.13.2",
+    "tldextract>=5.3.0",
+    "scapy>=2.6.1",
+    "dpkt>=1.9.8",
+]
